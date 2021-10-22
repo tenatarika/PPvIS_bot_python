@@ -34,6 +34,18 @@ def get_listID():
 
 # print(get_listID())
 
+def add_data_to_sheet(data):
+    values = service.spreadsheets().values().batchUpdate(
+        spreadsheetId=spreadsheet_id,
+        body={
+            "valueInputOption": "USER_ENTERED",
+            "data": [
+                {"range": "A2:B999",
+                "majorDimension": "ROWS",
+                "values": data}
+        ]
+        }
+    ).execute()
 
 
 # Пример чтения таблицы 
@@ -41,10 +53,32 @@ def read_sheet(list_name: str, range_of_list: str):
     values = service.spreadsheets().values().get(
         spreadsheetId=spreadsheet_id,
         range=f"'{list_name}'!"+f'{range_of_list}', # 'A1:E10'
-        majorDimension='COLUMNS'
+        majorDimension='ROWS'
     ).execute()
     return values
-# print(read_sheet('921704-2021','A1:E10'))  
+
+# пришло такое значение ['test 16', 'This is C3']
+def add_data(request: list):
+    row_data = read_sheet('Лист1','A1:B999')
+    data = row_data.get('values')[1:]
+    print(data)  
+
+    for item in data:
+        if item[0] == request[0]:
+            item[1] = request[1]
+            print(data)
+            
+            return add_data_to_sheet(data)
+    
+    data.append(request)
+    print(data)
+    add_data_to_sheet(data)
+    
+
+request = ['test 59', 'aaa']
+
+add_data(request)
+
 # Пример создания листа
 def create_list_sheet(year: str):
     results = service.spreadsheets().batchUpdate(
